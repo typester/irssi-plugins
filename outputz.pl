@@ -8,6 +8,7 @@ use POE qw/
     Component::Client::HTTPDeferred
     /;
 
+use URI::Template;
 use HTTP::Request::Common;
 
 our %IRSSI = (
@@ -16,7 +17,7 @@ our %IRSSI = (
 );
 
 Irssi::settings_add_str('outputz', 'outputz_key', '');
-Irssi::settings_add_str('outputz', 'outputz_uri', '');
+Irssi::settings_add_str('outputz', 'outputz_uri', 'irc://{server}:{port}/{channel}');
 
 POE::Session::Irssi->create(
     irssi_signals => {
@@ -29,7 +30,14 @@ POE::Session::Irssi->create(
                 my $uri = Irssi::settings_get_str('outputz_uri');
                 return unless $key and $uri;
 
-                $uri = sprintf($uri, $target) if $uri =~ /%s/;
+                my $template = URI::Template->new($uri);
+                $uri = $template->process(
+                    channel    => $target,
+                    server     => $server->{address},
+                    port       => $server->{port},
+                    nick       => $server->{nick},
+                    server_tag => $server->{tag},
+                );
 
                 my $ua = POE::Component::Client::HTTPDeferred->new;
                 my $d  = $ua->request(
