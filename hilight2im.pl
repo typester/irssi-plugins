@@ -21,7 +21,7 @@ sub sig_printtext {
 
     if ( $dest->{level} & MSGLEVEL_HILIGHT ) {
         my $user = Irssi::settings_get_str('im_kayac_com_username') or return;
-        my $msg  = sprintf('[irssi] %s', $stripped);
+        my $msg  = sprintf('[irssi] %s %s', $dest->{target}, $stripped);
 
         my $req = POST "http://im.kayac.com/api/post/$user", [ message => $msg ];
         my %headers = map { $_ => $req->header($_), } $req->headers->header_field_names;
