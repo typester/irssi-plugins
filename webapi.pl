@@ -111,6 +111,7 @@ sub handle_request {
     my $paths = {
         'servers'  => \&handle_servers,
         'channels' => \&handle_channels,
+        'queries'  => \&handle_queries,
         'messages' => \&handle_messages,
         'nicks'    => \&handle_nicks,
         'replies'  => \&handle_replies,
@@ -161,6 +162,25 @@ sub handle_channels {
     }
 
     [map channel_hash($_), @channels];
+}
+
+sub handle_queries {
+    my ($req) = @_;
+
+    my @queries;
+    if (my $server_tag = $req->parm('server')) {
+        my $server = Irssi::server_find_tag($server_tag);
+        unless ($server) {
+            return { error => qq[no such server tag:"$server_tag"] };
+        }
+
+        @queries = $server->queries();
+    }
+    else {
+        @queries = Irssi::queries();
+    }
+
+    [map query_hash($_), @queries];
 }
 
 sub handle_messages {
@@ -240,6 +260,8 @@ sub handle_post {
     else {
         $server->command("MSG $target $message");
     }
+
+    return { result => 'sent' };
 }
 
 sub nick_hash {
@@ -262,6 +284,16 @@ sub channel_hash {
         server => $channel->{server}{tag},
         unread => $state->{unread_count}{ $channel->{server}{tag} }{ $channel->{name} }
             || 0,
+    };
+}
+
+sub query_hash {
+    my ($query) = @_;
+
+    return {
+        name   => $query->{name},
+        server => $query->{server_tag},
+        unread => $state->{unread_count}{ $query->{server_tag} }{ $query->{name} } || 0,
     };
 }
 
