@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Irssi;
+use Irssi ();
 
 use AnyEvent;
 use AnyEvent::Socket;
@@ -13,6 +13,7 @@ my ($getsock, $setsock);
 
 Irssi::settings_add_str('channel-socket', 'channel-get-socket-path', '/tmp/irssi-channels.sock');
 Irssi::settings_add_str('channel-socket', 'channel-set-socket-path', '/tmp/irssi-set-channel.sock');
+Irssi::settings_add_bool('channel-socket', 'channel-socket-autostart', 0);
 
 Irssi::command_bind('channel-socket', sub {
     my ($data) = @_;
@@ -53,7 +54,9 @@ Irssi::command_bind('channel-socket', sub {
             });
         };
 
-        Irssi::print("started socket at: " . Irssi::settings_get_str('channel-socket-path'));
+        Irssi::print('started socket at:');
+        Irssi::print('  read socket: ' . Irssi::settings_get_str('channel-get-socket-path'));
+        Irssi::print('  write socket: ' . Irssi::settings_get_str('channel-set-socket-path'));
     }
     elsif ($data eq 'stop') {
         undef $setsock;
@@ -61,6 +64,10 @@ Irssi::command_bind('channel-socket', sub {
         Irssi::print("stopped");
     }
 });
+
+if (Irssi::settings_get_str('channel-socket-autostart')) {
+    Irssi::command('channel-socket start');
+}
 
 # avoid warning
 { package Irssi::Nick }
