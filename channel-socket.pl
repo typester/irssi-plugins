@@ -51,7 +51,8 @@ Irssi::command_bind('channel-socket', sub {
             );
 
             $h->push_read( line => sub {
-                Irssi::command('window goto ' . $_[1]);
+                my $window_name = (split ' ', $_[1])[0];
+                Irssi::command('window goto ' . $window_name);
                 undef $h;
             });
         };
