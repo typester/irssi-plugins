@@ -35,9 +35,9 @@ Irssi::command_bind('channel-socket', sub {
             );
 
             for my $window (Irssi::windows()) {
-                my $name    = $window->{active} ? $window->{active}{name} : $window->{name};
-                my $chatnet = $window->{active} ? ' - ' . $window->{active}{server}{chatnet} : '';
-                $h->push_write("$name$chatnet\n") if $h;
+                my $name       = $window->{active} ? $window->{active}{name} : $window->{name};
+                my $server_tag = $window->{active} ? ' - '$window->{active}{server}{tag} : '';
+                $h->push_write("$name$server_tag\n") if $h;
             }
             $h->on_drain(sub { undef $h }) if $h;
         };
