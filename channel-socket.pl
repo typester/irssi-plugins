@@ -34,8 +34,10 @@ Irssi::command_bind('channel-socket', sub {
                 },
             );
 
-            for my $channel (Irssi::channels()) {
-                $h->push_write("$channel->{name}\n") if $h;
+            for my $window (Irssi::windows()) {
+                my $name       = $window->{active} ? $window->{active}{name} : $window->{name};
+                my $server_tag = $window->{servertag};
+                $h->push_write("$name\n") if $h;
             }
             $h->on_drain(sub { undef $h }) if $h;
         };
