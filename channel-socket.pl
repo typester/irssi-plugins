@@ -34,11 +34,28 @@ Irssi::command_bind('channel-socket', sub {
                 },
             );
 
+            my @window_params_list;
+            my $max_length = 0;
+
             for my $window (Irssi::windows()) {
-                my $name       = $window->{active} ? $window->{active}{name} : $window->{name};
-                my $server_tag = $window->{servertag};
-                $h->push_write("$name\n") if $h;
+                my $name       = $window->{active} ? $window->{active}{name}        : $window->{name};
+                my $server_tag = $window->{active} ? $window->{active}{server}{tag} : '';
+                my $length     = length $name;
+
+                push @window_params_list, {
+                    name       => $name,
+                    server_tag => $server_tag,
+                    length     => length $name,
+                };
+
+                $max_length = $length if $max_length < $length;
             }
+
+            for my $params (@window_params_list) {
+                my $padding = $params->{server_tag} ? ' ' x ($max_length - $params->{length} + 1) : '';
+                $h->push_write("${$params}{name}$padding${$params}{server_tag}\n") if $h;
+            }
+
             $h->on_drain(sub { undef $h }) if $h;
         };
 
@@ -51,7 +68,8 @@ Irssi::command_bind('channel-socket', sub {
             );
 
             $h->push_read( line => sub {
-                Irssi::command('window goto ' . $_[1]);
+                my $window_name = (split ' ', $_[1])[0];
+                Irssi::command('window goto ' . $window_name);
                 undef $h;
             });
         };
