@@ -39,6 +39,8 @@ Irssi::command_bind('channel-socket', sub {
 
             for my $window (Irssi::windows()) {
                 my $name       = $window->{active} ? $window->{active}{name}        : $window->{name};
+                next unless $name; # unused window
+
                 my $server_tag = $window->{active} ? $window->{active}{server}{tag} : '';
                 my $length     = length $name;
 
