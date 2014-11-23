@@ -29,7 +29,7 @@ sub sig_printtext {
         my $req = POST 'https://api.pushbullet.com/v2/pushes',
             'Content-Type' => 'application/json',
             'Authorization' => 'Bearer ' . $token,
-            Content => encode_json({
+            Content => to_json({
                 type => 'note',
                 title => $msg,
                 ($channel) ? (channel_tag => $channel) : (),
